@@ -1,5 +1,4 @@
-
-
+import tkinter
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -14,10 +13,6 @@ class ScheduleApp:
         self.schedule_list = []
         self.reminder_days = 3
         self.create_widgets()
-
-        self.right_frame = ttk.Frame(padding=(10, 10))
-        self.right_frame.pack(side="right", fill="both", expand=True)
-
 
     def create_widgets(self):
         # 创建日程列表
@@ -37,7 +32,7 @@ class ScheduleApp:
         self.schedule_tree.configure(yscrollcommand=scroll_bar.set)
         # 创建日程输入框
         input_frame = tk.Frame(self.root)
-        input_frame.pack(padx=10, pady=10)
+        input_frame.pack(padx=15, pady=15)
         content_label = tk.Label(input_frame, text="日程内容：")
         content_label.grid(row=0, column=0, padx=5, pady=5)
         self.content_entry = tk.Entry(input_frame)
@@ -64,10 +59,17 @@ class ScheduleApp:
         end_month_option.grid(row=2, column=2, padx=5, pady=5)
         end_day_option = tk.OptionMenu(input_frame, self.end_day_var, *range(1, 32))
         end_day_option.grid(row=2, column=3, padx=5, pady=5)
+
         note_label = tk.Label(input_frame, text="备注：")
         note_label.grid(row=3, column=0, padx=5, pady=5)
         self.note_entry = tk.Entry(input_frame)
         self.note_entry.grid(row=3, column=1, columnspan=3, padx=5, pady=5)
+
+        ddl_label = tk.Label(input_frame, text="剩余时间：")
+        ddl_label.grid(row=4, column=0, padx=5, pady=5)
+        self.ddl_entry = tk.Entry(input_frame)
+        self.ddl_entry.grid(row=4, column=1, columnspan=3, padx=5, pady=5)
+
         # 创建按钮
         button_frame = tk.Frame(self.root)
         button_frame.pack(padx=10, pady=10)
@@ -81,6 +83,17 @@ class ScheduleApp:
         save_button.pack(side="left", padx=5)
         load_button = tk.Button(button_frame, text="读取", command=self.load_schedule)
         load_button.pack(side="left", padx=5)
+        check_button = tk.Button(button_frame, text="检查", command=self.check_schedule)
+        check_button.pack(side="left", padx=5)
+
+
+    def check_schedule(self):
+        check_days = int(self.ddl_entry.get())
+        today = datetime.date.today()
+        for schedule in self.schedule_list:
+            end_date = datetime.datetime.strptime(schedule['end'], '%Y-%m-%d').date()
+            if (end_date - today).days <= check_days :
+                messagebox.showwarning("即将到期", f"{schedule['content']}将在{check_days}天内到期！")
 
     def add_schedule(self):
         content = self.content_entry.get()
@@ -151,13 +164,12 @@ class ScheduleApp:
         for schedule in self.schedule_list:
             end_date = datetime.datetime.strptime(schedule["end"], "%Y-%m-%d").date()
             delta = (end_date - today).days
-            if delta == self.check_days_input:
+            if delta == 2:
                 messagebox.showinfo("提醒", f"日程'{schedule['content']}'即将到期！")
         self.root.after(1000 * 60 * 60 * 24, self.check_reminder)
 
     def run(self):
         self.root.mainloop()
-
 
 app = ScheduleApp()
 app.run()
